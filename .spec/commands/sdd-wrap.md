@@ -1,0 +1,103 @@
+---
+description: Cierra el ticket — actualiza memoria, archiva spec, commit y PR
+---
+
+Este es el paso que alimenta la memoria arquitectónica.
+**Sin este paso, el sistema no aprende.**
+
+## Precondición
+
+- `/sdd-review` con veredicto ✓
+- Sin bloqueantes pendientes
+
+## Pasos
+
+### 1. Detectar decisión arquitectónica
+
+Si se tomó una decisión relevante, invoca skill `write-adr`.
+
+> "¿Documentamos esta decisión como ADR?
+>  - Sí, crear ADR-NNNN
+>  - No, es menor
+>  - Ya existe: ADR-NNNN"
+
+### 2. Actualizar CONTEXT.md
+
+Para cada servicio modificado, invoca skill `update-service-context`.
+
+> "¿Ha cambiado el comportamiento del servicio X?
+>  - Sí, actualizar CONTEXT.md
+>  - No, cambio interno sin impacto externo"
+
+### 3. Otros rastros
+
+> "¿Añadimos algo a...?
+>  - decisions.md del servicio
+>  - incidents.md del servicio
+>  - glossary.md"
+
+### 4. Archivar spec
+
+- Consolida contenido relevante en `.docs/specs/<capability>/`
+- Mueve `.docs/changes/<ticket-id>/` → `.docs/changes/archive/<ticket-id>/`
+
+### 5. Commit
+
+```
+<tipo>(<scope>): <resumen>
+
+<cuerpo opcional>
+
+Refs: <TICKET-ID>
+ADRs: <ADR-NNNN si aplica>
+```
+
+Si hay muchos cambios, propón agrupar en commits lógicos.
+
+### 6. Crear PR
+
+**Título**: `<TICKET-ID>: <título>`
+
+**Descripción**:
+```
+## Ticket
+<link a Jira>
+
+## Resumen
+<qué cambia y por qué>
+
+## Spec
+.docs/changes/archive/<ticket-id>/proposal.md
+
+## ADRs
+- ADR-NNNN: <título> (si aplica)
+
+## Verificación manual
+<pasos del plan>
+
+## Checklist
+- [x] Spec archivada
+- [x] CONTEXT.md actualizado
+- [x] ADR creado (si aplicaba)
+- [x] Review sin bloqueantes
+```
+
+### 7. Resumen final
+
+```
+## Ticket <TICKET-ID> cerrado
+
+- Spec archivada: <ruta>
+- Specs consolidadas: <rutas>
+- ADRs creados: <lista o "ninguno">
+- CONTEXT.md actualizados: <lista o "ninguno">
+- Commits: <número>
+- PR: <link>
+```
+
+## Reglas
+
+- No saltes el paso de memoria.
+- Si el usuario dice "no" a todo, avisa: "cerramos sin memoria, ¿seguro?"
+- No ejecutes commits ni PR sin confirmación.
+- Si algo falla, para y reporta.
