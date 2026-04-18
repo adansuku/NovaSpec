@@ -69,7 +69,13 @@ branch:
     feature: feature
     architecture: arch
   ticket_case: upper
+  base: main            # rama base del flujo
 ```
+
+`branch.base` define la rama contra la que se crea cada rama de ticket
+en `/sdd-start` y contra la que se abre el PR en `/sdd-wrap`. Si la
+clave falta (instalación vieja), el framework intenta `develop` y, si
+tampoco existe, pregunta al usuario recomendando fijarla en `config.yml`.
 
 ### Agentes (`.spec/agents/`)
 
@@ -111,12 +117,17 @@ Cada ejecución del flujo produce artefactos en `.docs/`:
 
 | Artefacto | Dónde | Ciclo de vida |
 |---|---|---|
-| spec en curso | `.docs/changes/<ticket>/proposal.md` | Hasta cerrar el ticket |
-| plan en curso | `.docs/changes/<ticket>/plan.md` | Hasta cerrar el ticket |
-| tareas | `.docs/changes/<ticket>/tasks.md` | Hasta cerrar el ticket |
+| spec en curso | `.docs/changes/active/<ticket>/proposal.md` | Hasta cerrar el ticket |
+| plan en curso | `.docs/changes/active/<ticket>/plan.md` | Hasta cerrar el ticket |
+| tareas | `.docs/changes/active/<ticket>/tasks.md` | Hasta cerrar el ticket |
+| review | `.docs/changes/active/<ticket>/review.md` | Hasta cerrar el ticket |
 | spec archivada | `.docs/changes/archive/<ticket>/` | Permanente |
 | ADRs | `.docs/adr/` | Permanente |
 | CONTEXT.md de servicio | `.docs/services/<servicio>/` | Actualizable |
+
+`.docs/changes/` tiene dos hijos: `active/` (tickets en curso) y
+`archive/` (tickets cerrados). `/sdd-wrap` mueve la carpeta del ticket
+de `active/` a `archive/`.
 
 ## Decisiones clave
 
@@ -166,4 +177,4 @@ Cada ejecución del flujo produce artefactos en `.docs/`:
 
 ## Última actualización
 
-2026-04-18 — AGEX-003
+2026-04-18 — AGEX-004

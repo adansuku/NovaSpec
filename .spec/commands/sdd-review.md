@@ -18,7 +18,7 @@ Revisor final antes de cerrar el ticket.
    **Para aquí. No sigas.**
 
 2. Comprueba si es quick-fix (rama `fix/`) y si existe
-   `.docs/changes/<ticket-id>/tasks.md`.
+   `.docs/changes/active/<ticket-id>/tasks.md`.
    - Si **existe `tasks.md`**: comprueba que no quede ningún `- [ ]`
      sin marcar. Si quedan tareas pendientes:
 
@@ -47,9 +47,9 @@ Revisor final antes de cerrar el ticket.
 ### 1. Preparar el review
 
 Lee:
-- `.docs/changes/<ticket-id>/proposal.md`
-- `.docs/changes/<ticket-id>/plan.md`
-- `.docs/changes/<ticket-id>/tasks.md`
+- `.docs/changes/active/<ticket-id>/proposal.md`
+- `.docs/changes/active/<ticket-id>/plan.md`
+- `.docs/changes/active/<ticket-id>/tasks.md`
 - ADRs relevantes en `.docs/adr/`
 - Diff de los cambios
 
@@ -103,7 +103,7 @@ Lee:
 ```
 
 **Persiste el reporte**: escribe el reporte completo (con el veredicto
-incluido) en `.docs/changes/<ticket-id>/review.md`. Este archivo es
+incluido) en `.docs/changes/active/<ticket-id>/review.md`. Este archivo es
 leído por `/sdd-wrap` para verificar que el review fue aprobado.
 
 ### 4. Checkpoint humano

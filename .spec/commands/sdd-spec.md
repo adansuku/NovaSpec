@@ -41,7 +41,7 @@ están cerradas.
 
 ### 2. Redactar la spec
 
-Crea `.docs/changes/<ticket-id>/proposal.md`:
+Crea `.docs/changes/active/<ticket-id>/proposal.md`:
 
 ```
 # <TICKET-ID>: <título>
@@ -97,7 +97,7 @@ Como <actor>, quiero <capacidad>, para <resultado>.
 
 Muestra la spec y di:
 
-> "Spec generada en `.docs/changes/<ticket-id>/proposal.md`.
+> "Spec generada en `.docs/changes/active/<ticket-id>/proposal.md`.
 >  Revísala antes de `/sdd-plan`."
 
 No avances automáticamente.

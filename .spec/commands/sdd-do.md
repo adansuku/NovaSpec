@@ -19,8 +19,8 @@ Ejecutas `tasks.md` en orden, tarea a tarea.
 
 2. Comprueba si la rama empieza por `fix/` (quick-fix).
    - Si **no es quick-fix**: comprueba que existen
-     `.docs/changes/<ticket-id>/plan.md` y
-     `.docs/changes/<ticket-id>/tasks.md`.
+     `.docs/changes/active/<ticket-id>/plan.md` y
+     `.docs/changes/active/<ticket-id>/tasks.md`.
      Si falta alguno:
 
      ```
@@ -34,7 +34,7 @@ Ejecutas `tasks.md` en orden, tarea a tarea.
 
 ## Precondición
 
-Debe existir `.docs/changes/<ticket-id>/tasks.md`.
+Debe existir `.docs/changes/active/<ticket-id>/tasks.md`.
 
 **Excepción**: si el ticket es `quick-fix`, puedes operar sin tasks.md.
 Implementa directamente y salta al paso 4.

@@ -10,11 +10,12 @@ echo "→ Creando estructura de libnova.spec..."
 # Directorios
 mkdir -p .spec/{commands,skills,agents}
 mkdir -p .spec/skills/{load-context,close-requirement,write-adr,update-service-context}
-mkdir -p .docs/{adr,services,post-mortems,specs,changes/archive}
+mkdir -p .docs/{adr,services,post-mortems,specs,changes/{active,archive}}
 mkdir -p .claude
 
 # Archivos base
 touch .docs/glossary.md
+touch .docs/changes/active/.gitkeep
 touch notes.md
 
 # Symlinks (.claude/ hacia .spec/)
@@ -37,6 +38,7 @@ branch:
     feature: feature
     architecture: arch
   ticket_case: upper    # upper | lower
+  base: main            # rama base del flujo (checkout en /sdd-start, --base en /sdd-wrap)
 EOF
 
 # ============================================================
@@ -60,15 +62,16 @@ Antes de empezar cualquier ticket, carga el contexto relevante:
 ## Flujo de trabajo
 
 ```
-/sdd-start <TICKET>    Arranca el flujo, clasifica, carga contexto
-/sdd-spec              Genera la spec (qué cambia y por qué)
-/sdd-plan              Genera plan y tareas
-/sdd-do                Implementa tareas
-/sdd-review            Valida spec, convenciones y ADRs
-/sdd-wrap              Actualiza memoria, commit y PR
+/sdd-start <TICKET>       Arranca el flujo, clasifica, carga contexto
+/sdd-spec                 Genera la spec (qué cambia y por qué)
+/sdd-plan                 Genera plan y tareas
+/sdd-do                   Implementa tareas
+/sdd-review               Valida spec, convenciones y ADRs
+/sdd-wrap                 Actualiza memoria, commit y PR
+/sdd-status [TICKET-ID]   Muestra el estado actual del ticket (solo lectura)
 ```
 
-Los cambios en curso viven en `.docs/changes/<ticket-id>/`.
+Los cambios en curso viven en `.docs/changes/active/<ticket-id>/`.
 Al cerrar, se archivan en `.docs/changes/archive/`.
 
 Tickets `quick-fix` saltan `/sdd-spec` y `/sdd-plan`.
@@ -129,12 +132,26 @@ Si no está claro, pregunta con opciones concretas.
 
 ### 4. Crear rama de git
 
-Lee `.spec/config.yml` para la convención.
-Default: `feature/<TICKET>-<slug>`, `fix/<TICKET>-<slug>`, `arch/<TICKET>-<slug>`.
+Lee `.spec/config.yml`:
+- `branch.pattern` para el nombre de rama (default `{type}/{ticket}-{slug}`).
+- `branch.base` para la rama base del flujo. Resolución:
+  - Si la clave **existe**: usa ese valor. Si la rama no existe en git,
+    deja que `git checkout` falle con su error nativo.
+  - Si la clave **falta** (instalación vieja): intenta `develop`.
+    - Si `develop` existe: úsala, pero avisa al usuario:
+      "Usando `develop` como fallback. Añade `branch.base` a
+      `.spec/config.yml` para fijarla."
+    - Si `develop` no existe: lista las ramas locales (`git branch`),
+      pregunta al usuario cuál usar y recomienda escribirla en
+      `.spec/config.yml`. No sigas hasta tener respuesta.
+
+Default por tipo: `feature/<TICKET>-<slug>`, `fix/<TICKET>-<slug>`,
+`arch/<TICKET>-<slug>`.
 
 Antes de crear:
-- verifica rama base limpia
-- si la rama ya existe, pregunta: continuar o abortar
+- verifica working tree limpio
+- haz `git checkout <base>` y `git pull` sobre la rama base resuelta
+- si la rama de ticket ya existe, pregunta: continuar o abortar
 
 ### 5. Cargar contexto
 
@@ -183,6 +200,24 @@ description: Genera la spec del cambio a partir del ticket y el contexto cargado
 
 Eres el encargado de generar la spec técnica del ticket actual.
 
+## Guardrail
+
+**Ejecuta esto antes de cualquier otro paso.**
+
+1. Lee la rama git actual (`git branch --show-current`).
+2. Comprueba que sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`
+   definido en `.spec/config.yml`.
+3. Si la rama es `main`, `master`, `claude/*` u otra sin patrón de ticket:
+
+   ```
+   ⛔ Guardrail: no hay rama de ticket activa.
+   Ejecuta /sdd-start <TICKET> primero.
+   ```
+   **Para aquí. No sigas.**
+
+4. Si la rama sigue el patrón, extrae el `<TICKET>` del nombre de rama
+   y úsalo como ticket-id para el resto del comando.
+
 ## Precondición
 
 Debe haberse ejecutado `/sdd-start` antes. Si no detectas rama creada y
@@ -202,7 +237,7 @@ están cerradas.
 
 ### 2. Redactar la spec
 
-Crea `.docs/changes/<ticket-id>/proposal.md`:
+Crea `.docs/changes/active/<ticket-id>/proposal.md`:
 
 ```
 # <TICKET-ID>: <título>
@@ -258,7 +293,7 @@ Como <actor>, quiero <capacidad>, para <resultado>.
 
 Muestra la spec y di:
 
-> "Spec generada en `.docs/changes/<ticket-id>/proposal.md`.
+> "Spec generada en `.docs/changes/active/<ticket-id>/proposal.md`.
 >  Revísala antes de `/sdd-plan`."
 
 No avances automáticamente.
@@ -277,9 +312,31 @@ description: Genera plan de implementación y tareas a partir de la spec aprobad
 
 Traduces la spec en un plan ejecutable.
 
+## Guardrail
+
+**Ejecuta esto antes de cualquier otro paso.**
+
+1. Lee la rama git actual y extrae el `<ticket-id>`.
+   Si la rama no sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`:
+
+   ```
+   ⛔ Guardrail: no hay rama de ticket activa.
+   Ejecuta /sdd-start <TICKET> primero.
+   ```
+   **Para aquí. No sigas.**
+
+2. Comprueba que existe `.docs/changes/active/<ticket-id>/proposal.md`.
+   Si no existe:
+
+   ```
+   ⛔ Guardrail: no existe proposal.md para <ticket-id>.
+   Ejecuta /sdd-spec primero.
+   ```
+   **Para aquí. No sigas.**
+
 ## Precondición
 
-Debe existir `.docs/changes/<ticket-id>/proposal.md`.
+Debe existir `.docs/changes/active/<ticket-id>/proposal.md`.
 
 ## Pasos
 
@@ -289,7 +346,7 @@ Identifica servicios afectados, decisiones cerradas, criterios de éxito.
 
 ### 2. Generar plan.md
 
-Crea `.docs/changes/<ticket-id>/plan.md`:
+Crea `.docs/changes/active/<ticket-id>/plan.md`:
 
 ```
 # Plan: <TICKET-ID>
@@ -322,7 +379,7 @@ Cómo verificar cada criterio de éxito de la spec.
 
 ### 3. Generar tasks.md
 
-Crea `.docs/changes/<ticket-id>/tasks.md`:
+Crea `.docs/changes/active/<ticket-id>/tasks.md`:
 
 ```
 # Tareas: <TICKET-ID>
@@ -355,9 +412,37 @@ description: Implementa las tareas del plan una a una con review incremental
 
 Ejecutas `tasks.md` en orden, tarea a tarea.
 
+## Guardrail
+
+**Ejecuta esto antes de cualquier otro paso.**
+
+1. Lee la rama git actual y extrae el `<ticket-id>`.
+   Si la rama no sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`:
+
+   ```
+   ⛔ Guardrail: no hay rama de ticket activa.
+   Ejecuta /sdd-start <TICKET> primero.
+   ```
+   **Para aquí. No sigas.**
+
+2. Comprueba si la rama empieza por `fix/` (quick-fix).
+   - Si **no es quick-fix**: comprueba que existen
+     `.docs/changes/active/<ticket-id>/plan.md` y
+     `.docs/changes/active/<ticket-id>/tasks.md`.
+     Si falta alguno:
+
+     ```
+     ⛔ Guardrail: no existe plan.md o tasks.md para <ticket-id>.
+     Ejecuta /sdd-plan primero.
+     ```
+     **Para aquí. No sigas.**
+
+   - Si **es quick-fix**: puedes continuar aunque no existan
+     `plan.md` ni `tasks.md`. Salta directamente al paso 4.
+
 ## Precondición
 
-Debe existir `.docs/changes/<ticket-id>/tasks.md`.
+Debe existir `.docs/changes/active/<ticket-id>/tasks.md`.
 
 **Excepción**: si el ticket es `quick-fix`, puedes operar sin tasks.md.
 Implementa directamente y salta al paso 4.
@@ -420,6 +505,39 @@ description: Code review final del cambio contra spec, convenciones y ADRs
 
 Revisor final antes de cerrar el ticket.
 
+## Guardrail
+
+**Ejecuta esto antes de cualquier otro paso.**
+
+1. Lee la rama git actual y extrae el `<ticket-id>`.
+   Si la rama no sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`:
+
+   ```
+   ⛔ Guardrail: no hay rama de ticket activa.
+   Ejecuta /sdd-start <TICKET> primero.
+   ```
+   **Para aquí. No sigas.**
+
+2. Comprueba si es quick-fix (rama `fix/`) y si existe
+   `.docs/changes/active/<ticket-id>/tasks.md`.
+   - Si **existe `tasks.md`**: comprueba que no quede ningún `- [ ]`
+     sin marcar. Si quedan tareas pendientes:
+
+     ```
+     ⛔ Guardrail: hay N tarea(s) sin completar en tasks.md.
+     Ejecuta /sdd-do para completarlas primero.
+     ```
+     **Para aquí. No sigas.**
+
+   - Si **no existe `tasks.md`** y es quick-fix: continúa.
+   - Si **no existe `tasks.md`** y no es quick-fix:
+
+     ```
+     ⛔ Guardrail: no existe tasks.md para <ticket-id>.
+     Ejecuta /sdd-plan primero.
+     ```
+     **Para aquí. No sigas.**
+
 ## Precondición
 
 - Todas las tareas de `tasks.md` marcadas `[x]`
@@ -430,9 +548,9 @@ Revisor final antes de cerrar el ticket.
 ### 1. Preparar el review
 
 Lee:
-- `.docs/changes/<ticket-id>/proposal.md`
-- `.docs/changes/<ticket-id>/plan.md`
-- `.docs/changes/<ticket-id>/tasks.md`
+- `.docs/changes/active/<ticket-id>/proposal.md`
+- `.docs/changes/active/<ticket-id>/plan.md`
+- `.docs/changes/active/<ticket-id>/tasks.md`
 - ADRs relevantes en `.docs/adr/`
 - Diff de los cambios
 
@@ -485,6 +603,10 @@ Lee:
 ✗ Requiere ajustes
 ```
 
+**Persiste el reporte**: escribe el reporte completo (con el veredicto
+incluido) en `.docs/changes/active/<ticket-id>/review.md`. Este archivo es
+leído por `/sdd-wrap` para verificar que el review fue aprobado.
+
 ### 4. Checkpoint humano
 
 Si hay bloqueantes → pide resolverlos.
@@ -505,6 +627,38 @@ description: Cierra el ticket — actualiza memoria, archiva spec, commit y PR
 
 Este es el paso que alimenta la memoria arquitectónica.
 **Sin este paso, el sistema no aprende.**
+
+## Guardrail
+
+**Ejecuta esto antes de cualquier otro paso.**
+
+1. Lee la rama git actual y extrae el `<ticket-id>`.
+   Si la rama no sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`:
+
+   ```
+   ⛔ Guardrail: no hay rama de ticket activa.
+   Ejecuta /sdd-start <TICKET> primero.
+   ```
+   **Para aquí. No sigas.**
+
+2. Comprueba que existe `.docs/changes/active/<ticket-id>/review.md`.
+   Si no existe:
+
+   ```
+   ⛔ Guardrail: no existe review.md para <ticket-id>.
+   Ejecuta /sdd-review primero.
+   ```
+   **Para aquí. No sigas.**
+
+3. Lee `.docs/changes/active/<ticket-id>/review.md` y busca la línea
+   `✓ Listo para /sdd-wrap`.
+   Si no aparece esa línea:
+
+   ```
+   ⛔ Guardrail: el review de <ticket-id> no tiene veredicto ✓.
+   Resuelve los bloqueantes y vuelve a ejecutar /sdd-review.
+   ```
+   **Para aquí. No sigas.**
 
 ## Precondición
 
@@ -540,7 +694,7 @@ Para cada servicio modificado, invoca skill `update-service-context`.
 ### 4. Archivar spec
 
 - Consolida contenido relevante en `.docs/specs/<capability>/`
-- Mueve `.docs/changes/<ticket-id>/` → `.docs/changes/archive/<ticket-id>/`
+- Mueve `.docs/changes/active/<ticket-id>/` → `.docs/changes/archive/<ticket-id>/`
 
 ### 5. Commit
 
@@ -556,6 +710,14 @@ ADRs: <ADR-NNNN si aplica>
 Si hay muchos cambios, propón agrupar en commits lógicos.
 
 ### 6. Crear PR
+
+Resuelve la rama base igual que `/sdd-start`:
+- Lee `branch.base` de `.spec/config.yml`.
+- Si la clave falta, intenta `develop`; si tampoco existe, pregunta al
+  usuario y recomienda fijar `branch.base` en `.spec/config.yml`.
+
+Crea el PR con `gh pr create --base <base-resuelta> --title "<título>"
+--body "<descripción>"`.
 
 **Título**: `<TICKET-ID>: <título>`
 
@@ -602,6 +764,131 @@ Si hay muchos cambios, propón agrupar en commits lógicos.
 - Si el usuario dice "no" a todo, avisa: "cerramos sin memoria, ¿seguro?"
 - No ejecutes commits ni PR sin confirmación.
 - Si algo falla, para y reporta.
+EOF
+
+cat > .spec/commands/sdd-status.md <<'EOF'
+---
+description: Muestra el estado actual de un ticket en el flujo SDD
+argument-hint: [TICKET-ID]
+---
+
+Eres un comando de **solo lectura**. No modificas ningún archivo.
+Tu única función es inspeccionar artefactos en disco y reportar el estado.
+
+## Paso 1 — Resolver el ticket-id
+
+Si el usuario pasó un argumento (`$ARGUMENTS` no está vacío), úsalo como
+`<ticket-id>`.
+
+Si no hay argumento:
+1. Lee la rama git actual (`git branch --show-current`).
+2. Si la rama sigue el patrón `(feature|fix|arch)/<TICKET>-<slug>`,
+   extrae `<TICKET>` como `<ticket-id>`.
+3. Si la rama **no** sigue ese patrón:
+   - Lista los directorios bajo `.docs/changes/active/`.
+   - Si hay tickets abiertos, muestra:
+
+     ```
+     No hay ticket activo en la rama actual.
+
+     Tickets abiertos:
+     - <TICKET-ID>: <paso inferido>
+     ```
+
+   - Si no hay ninguno, muestra:
+
+     ```
+     No hay ticket activo y no hay tickets abiertos en .docs/changes/active/.
+     Ejecuta /sdd-start <TICKET> para comenzar.
+     ```
+
+   - En ambos casos, **termina aquí**.
+
+## Paso 2 — Localizar los artefactos
+
+Busca los artefactos del ticket en este orden de prioridad:
+
+1. **Archivado**: existe `.docs/changes/archive/<ticket-id>/` → paso = `archivado`
+2. **Activo**: directorio `.docs/changes/active/<ticket-id>/`
+
+Si no existe ninguno de los dos:
+
+```
+Ticket <ticket-id> no encontrado.
+No existe .docs/changes/active/<ticket-id>/ ni .docs/changes/archive/<ticket-id>/
+```
+
+Termina aquí.
+
+## Paso 3 — Inferir el paso actual
+
+Evalúa los artefactos en este orden (el primero que aplica gana):
+
+| Condición | Paso inferido |
+|---|---|
+| Directorio en `archive/` | `archivado` |
+| Existe `review.md` | `wrap` (listo para `/sdd-wrap`) |
+| Existe `tasks.md` y **todas** las líneas `- [x]` (ninguna `- [ ]`) | `review` (listo para `/sdd-review`) |
+| Existe `tasks.md` con al menos una `- [ ]` | `do` (en progreso) |
+| Existe `tasks.md` sin ningún checkbox | `do` (sin tareas ejecutadas) |
+| Existe `plan.md` pero no `tasks.md` | `plan` (plan sin tareas) |
+| Existe `proposal.md` pero no `plan.md` | `spec` (spec sin plan) |
+| No existe `proposal.md` | `start` (solo rama, sin spec) |
+
+## Paso 4 — Leer el título
+
+Si existe `proposal.md`, extrae el título de la primera línea `# <TICKET>: <título>`.
+Si no existe o no se puede leer, usa `(sin título)`.
+
+## Paso 5 — Calcular progreso de tareas
+
+Solo si el paso es `do` o `review`:
+- Cuenta líneas con `- [x]` → tareas completadas
+- Cuenta líneas con `- [ ]` → tareas pendientes
+- Total = completadas + pendientes
+
+## Paso 6 — Mostrar el reporte
+
+Usa este formato exacto:
+
+```
+## Estado del ticket <TICKET-ID>
+
+Título     : <título>
+Rama       : <rama git actual>
+Paso actual: <paso>
+Siguiente  : <siguiente comando>
+```
+
+Si el paso es `do`, añade debajo de "Paso actual":
+```
+Progreso   : <N completadas> / <M totales> tareas
+```
+
+Si el paso es `archivado`, sustituye "Siguiente" por:
+```
+Archivado  : .docs/changes/archive/<ticket-id>/
+```
+
+### Tabla de siguientes comandos
+
+| Paso | Siguiente comando |
+|---|---|
+| `start` | `/sdd-spec` |
+| `spec` | `/sdd-plan` |
+| `plan` | `/sdd-do` |
+| `do` | `/sdd-do` (continuar) |
+| `review` | `/sdd-review` |
+| `wrap` | `/sdd-wrap` |
+| `archivado` | — (ticket cerrado) |
+
+## Reglas
+
+- **No modifiques ningún archivo** bajo ninguna circunstancia.
+- Si un artefacto existe pero no se puede parsear, reporta
+  `(no se pudo leer <archivo>)` y continúa con lo que tengas.
+- No hagas suposiciones sobre el estado: infiere solo desde los archivos.
+- Si hay ambigüedad, elige el paso más conservador (el anterior en el flujo).
 EOF
 
 # ============================================================

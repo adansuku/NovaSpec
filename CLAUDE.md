@@ -14,15 +14,16 @@ Antes de empezar cualquier ticket, carga el contexto relevante:
 ## Flujo de trabajo
 
 ```
-/sdd-start <TICKET>    Arranca el flujo, clasifica, carga contexto
-/sdd-spec              Genera la spec (qué cambia y por qué)
-/sdd-plan              Genera plan y tareas
-/sdd-do                Implementa tareas
-/sdd-review            Valida spec, convenciones y ADRs
-/sdd-wrap              Actualiza memoria, commit y PR
+/sdd-start <TICKET>       Arranca el flujo, clasifica, carga contexto
+/sdd-spec                 Genera la spec (qué cambia y por qué)
+/sdd-plan                 Genera plan y tareas
+/sdd-do                   Implementa tareas
+/sdd-review               Valida spec, convenciones y ADRs
+/sdd-wrap                 Actualiza memoria, commit y PR
+/sdd-status [TICKET-ID]   Muestra el estado actual del ticket (solo lectura)
 ```
 
-Los cambios en curso viven en `.docs/changes/<ticket-id>/`.
+Los cambios en curso viven en `.docs/changes/active/<ticket-id>/`.
 Al cerrar, se archivan en `.docs/changes/archive/`.
 
 Tickets `quick-fix` saltan `/sdd-spec` y `/sdd-plan`.

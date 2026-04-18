@@ -52,7 +52,7 @@ los archivos de trabajo en `.docs/changes/`.
 │
 ├── .spec/                       Contenido canónico del framework
 │   ├── config.yml               Convenciones (ramas, tipos de ticket)
-│   ├── commands/                6 slash commands `/sdd-*`
+│   ├── commands/                7 slash commands `/sdd-*`
 │   ├── skills/                  4 skills autocargadas por contexto
 │   └── agents/                  Vacío, para sub-agents futuros
 │
@@ -65,7 +65,8 @@ los archivos de trabajo en `.docs/changes/`.
     ├── adr/                     Architectural Decision Records
     ├── services/                CONTEXT.md por servicio
     ├── specs/                   Source of truth (specs consolidadas)
-    ├── changes/                 Specs en curso
+    ├── changes/
+    │   ├── active/              Specs en curso (tickets abiertos)
     │   └── archive/             Specs archivadas al cerrar ticket
     ├── post-mortems/
     └── glossary.md              Términos del dominio
@@ -97,7 +98,7 @@ Abre Claude Code en la raíz del repo:
 claude
 ```
 
-Teclea `/` y comprueba que aparecen los 6 comandos en el autocomplete:
+Teclea `/` y comprueba que aparecen los 7 comandos en el autocomplete:
 
 - `/sdd-start`
 - `/sdd-spec`
@@ -105,6 +106,7 @@ Teclea `/` y comprueba que aparecen los 6 comandos en el autocomplete:
 - `/sdd-do`
 - `/sdd-review`
 - `/sdd-wrap`
+- `/sdd-status`
 
 ### 3. Primer ticket
 
@@ -132,7 +134,13 @@ branch:
     feature: feature
     architecture: arch
   ticket_case: upper    # upper | lower
+  base: main            # rama base del flujo
 ```
+
+`branch.base` controla contra qué rama se crea cada rama de ticket en
+`/sdd-start` y contra cuál se abre el PR en `/sdd-wrap`. Default seguro
+para repos convencionales; cámbialo a `develop` u otra si tu repo usa
+otra rama de integración.
 
 ### Documentar tus servicios
 

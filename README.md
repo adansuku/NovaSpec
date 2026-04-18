@@ -42,6 +42,7 @@ agex fuerza un flujo donde:
 | `/sdd-do` | Implementa tareas una a una con review incremental | — |
 | `/sdd-review` | Code review final contra spec, ADRs y convenciones | — |
 | `/sdd-wrap` | Actualiza memoria, archiva spec, commit y PR | `write-adr`, `update-service-context` |
+| `/sdd-status [TICKET-ID]` | Muestra el estado actual del ticket (solo lectura) | — |
 
 Los quick-fix saltan `/sdd-spec` y `/sdd-plan`.
 
@@ -118,7 +119,7 @@ Ticket Jira
 | Capa | Dónde vive | Ciclo de vida |
 |---|---|---|
 | **Sesión** | Contexto de Claude Code | Horas |
-| **Proyecto** | `.docs/changes/<ticket>/` | Semanas |
+| **Proyecto** | `.docs/changes/active/<ticket>/` | Semanas |
 | **Sistema** | `.docs/adr/`, `.docs/services/`, `.docs/specs/` | Años |
 | **Organización** | Repo base del framework (plantillas) | Permanente |
 

@@ -17,7 +17,7 @@ Traduces la spec en un plan ejecutable.
    ```
    **Para aquí. No sigas.**
 
-2. Comprueba que existe `.docs/changes/<ticket-id>/proposal.md`.
+2. Comprueba que existe `.docs/changes/active/<ticket-id>/proposal.md`.
    Si no existe:
 
    ```
@@ -28,7 +28,7 @@ Traduces la spec en un plan ejecutable.
 
 ## Precondición
 
-Debe existir `.docs/changes/<ticket-id>/proposal.md`.
+Debe existir `.docs/changes/active/<ticket-id>/proposal.md`.
 
 ## Pasos
 
@@ -38,7 +38,7 @@ Identifica servicios afectados, decisiones cerradas, criterios de éxito.
 
 ### 2. Generar plan.md
 
-Crea `.docs/changes/<ticket-id>/plan.md`:
+Crea `.docs/changes/active/<ticket-id>/plan.md`:
 
 ```
 # Plan: <TICKET-ID>
@@ -71,7 +71,7 @@ Cómo verificar cada criterio de éxito de la spec.
 
 ### 3. Generar tasks.md
 
-Crea `.docs/changes/<ticket-id>/tasks.md`:
+Crea `.docs/changes/active/<ticket-id>/tasks.md`:
 
 ```
 # Tareas: <TICKET-ID>

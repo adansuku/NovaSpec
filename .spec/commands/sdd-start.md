@@ -37,12 +37,26 @@ Si no está claro, pregunta con opciones concretas.
 
 ### 4. Crear rama de git
 
-Lee `.spec/config.yml` para la convención.
-Default: `feature/<TICKET>-<slug>`, `fix/<TICKET>-<slug>`, `arch/<TICKET>-<slug>`.
+Lee `.spec/config.yml`:
+- `branch.pattern` para el nombre de rama (default `{type}/{ticket}-{slug}`).
+- `branch.base` para la rama base del flujo. Resolución:
+  - Si la clave **existe**: usa ese valor. Si la rama no existe en git,
+    deja que `git checkout` falle con su error nativo.
+  - Si la clave **falta** (instalación vieja): intenta `develop`.
+    - Si `develop` existe: úsala, pero avisa al usuario:
+      "Usando `develop` como fallback. Añade `branch.base` a
+      `.spec/config.yml` para fijarla."
+    - Si `develop` no existe: lista las ramas locales (`git branch`),
+      pregunta al usuario cuál usar y recomienda escribirla en
+      `.spec/config.yml`. No sigas hasta tener respuesta.
+
+Default por tipo: `feature/<TICKET>-<slug>`, `fix/<TICKET>-<slug>`,
+`arch/<TICKET>-<slug>`.
 
 Antes de crear:
-- verifica rama base limpia
-- si la rama ya existe, pregunta: continuar o abortar
+- verifica working tree limpio
+- haz `git checkout <base>` y `git pull` sobre la rama base resuelta
+- si la rama de ticket ya existe, pregunta: continuar o abortar
 
 ### 5. Cargar contexto
 

@@ -6,3 +6,4 @@ branch:
     feature: feature
     architecture: arch
   ticket_case: upper    # upper | lower
+  base: main            # rama base del flujo (checkout en /sdd-start, --base en /sdd-wrap)

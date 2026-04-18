@@ -18,7 +18,7 @@ Este es el paso que alimenta la memoria arquitectónica.
    ```
    **Para aquí. No sigas.**
 
-2. Comprueba que existe `.docs/changes/<ticket-id>/review.md`.
+2. Comprueba que existe `.docs/changes/active/<ticket-id>/review.md`.
    Si no existe:
 
    ```
@@ -27,7 +27,7 @@ Este es el paso que alimenta la memoria arquitectónica.
    ```
    **Para aquí. No sigas.**
 
-3. Lee `.docs/changes/<ticket-id>/review.md` y busca la línea
+3. Lee `.docs/changes/active/<ticket-id>/review.md` y busca la línea
    `✓ Listo para /sdd-wrap`.
    Si no aparece esa línea:
 
@@ -71,7 +71,7 @@ Para cada servicio modificado, invoca skill `update-service-context`.
 ### 4. Archivar spec
 
 - Consolida contenido relevante en `.docs/specs/<capability>/`
-- Mueve `.docs/changes/<ticket-id>/` → `.docs/changes/archive/<ticket-id>/`
+- Mueve `.docs/changes/active/<ticket-id>/` → `.docs/changes/archive/<ticket-id>/`
 
 ### 5. Commit
 
@@ -87,6 +87,14 @@ ADRs: <ADR-NNNN si aplica>
 Si hay muchos cambios, propón agrupar en commits lógicos.
 
 ### 6. Crear PR
+
+Resuelve la rama base igual que `/sdd-start`:
+- Lee `branch.base` de `.spec/config.yml`.
+- Si la clave falta, intenta `develop`; si tampoco existe, pregunta al
+  usuario y recomienda fijar `branch.base` en `.spec/config.yml`.
+
+Crea el PR con `gh pr create --base <base-resuelta> --title "<título>"
+--body "<descripción>"`.
 
 **Título**: `<TICKET-ID>: <título>`
 
