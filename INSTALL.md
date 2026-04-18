@@ -1,0 +1,227 @@
+# Instalación de libnova.spec
+
+Guía para instalar el framework libnova.spec en cualquier repositorio.
+
+---
+
+## Requisitos previos
+
+- Git
+- Claude Code instalado
+- Bash (macOS, Linux o WSL en Windows)
+- Un repositorio donde instalar el framework (puede estar vacío o tener
+  contenido previo)
+
+> **Nota sobre Windows**: los symlinks que usa libnova.spec requieren
+> permisos especiales en Windows nativo (Developer Mode o admin). Se
+> recomienda usar **WSL** para evitar fricción.
+
+---
+
+## Instalación rápida
+
+### 1. Posicionarse en el repo destino
+
+```bash
+cd /ruta/a/tu/repo
+```
+
+### 2. Copiar `install.sh`
+
+Copia el script `install.sh` desde el repo base de libnova.spec a la
+raíz de tu repo destino (o invócalo por ruta absoluta).
+
+### 3. Ejecutar
+
+```bash
+bash install.sh
+```
+
+El script es idempotente: se puede ejecutar varias veces sobre el mismo
+repo sin romper nada existente. No sobrescribe `.docs/`, `notes.md` ni
+los archivos de trabajo en `.docs/changes/`.
+
+---
+
+## Qué se instala
+
+```
+.
+├── CLAUDE.md                    Ancla del repo, lo primero que Claude lee
+├── notes.md                     Notas de uso (para iteración)
+│
+├── .spec/                       Contenido canónico del framework
+│   ├── config.yml               Convenciones (ramas, tipos de ticket)
+│   ├── commands/                6 slash commands `/sdd-*`
+│   ├── skills/                  4 skills autocargadas por contexto
+│   └── agents/                  Vacío, para sub-agents futuros
+│
+├── .claude/                     Symlinks para que Claude Code descubra los comandos
+│   ├── commands -> ../.spec/commands
+│   ├── skills   -> ../.spec/skills
+│   └── agents   -> ../.spec/agents
+│
+└── .docs/                       Memoria arquitectónica y specs
+    ├── adr/                     Architectural Decision Records
+    ├── services/                CONTEXT.md por servicio
+    ├── specs/                   Source of truth (specs consolidadas)
+    ├── changes/                 Specs en curso
+    │   └── archive/             Specs archivadas al cerrar ticket
+    ├── post-mortems/
+    └── glossary.md              Términos del dominio
+```
+
+---
+
+## Verificación
+
+### 1. Symlinks de `.claude/`
+
+```bash
+ls -la .claude/
+```
+
+Debes ver tres flechas `->`:
+
+```
+agents   -> ../.spec/agents
+commands -> ../.spec/commands
+skills   -> ../.spec/skills
+```
+
+### 2. Comandos en Claude Code
+
+Abre Claude Code en la raíz del repo:
+
+```bash
+claude
+```
+
+Teclea `/` y comprueba que aparecen los 6 comandos en el autocomplete:
+
+- `/sdd-start`
+- `/sdd-spec`
+- `/sdd-plan`
+- `/sdd-do`
+- `/sdd-review`
+- `/sdd-wrap`
+
+### 3. Primer ticket
+
+Recomendado: empieza con un ticket pequeño y de bajo riesgo.
+
+```
+/sdd-start TICKET-ID
+```
+
+El comando te guía paso a paso.
+
+---
+
+## Personalización
+
+### Convenciones de rama
+
+Edita `.spec/config.yml`:
+
+```yaml
+branch:
+  pattern: "{type}/{ticket}-{slug}"
+  types:
+    quick-fix: fix
+    feature: feature
+    architecture: arch
+  ticket_case: upper    # upper | lower
+```
+
+### Documentar tus servicios
+
+Por cada servicio relevante de tu proyecto, crea:
+
+```
+.docs/services/<nombre-servicio>/CONTEXT.md
+```
+
+La skill `update-service-context` te genera la plantilla la primera vez
+que la invocas para un servicio nuevo.
+
+### Cargar decisiones previas
+
+Si tu proyecto ya tiene decisiones arquitectónicas, documenta las más
+importantes como ADRs en `.docs/adr/`. La skill `write-adr` te guía con
+el formato.
+
+---
+
+## Actualización del framework
+
+Para actualizar libnova.spec en un repo ya instalado, vuelve a ejecutar
+`install.sh` desde la versión más reciente del repo base:
+
+```bash
+bash install.sh
+```
+
+El script sobrescribe `.spec/` y `CLAUDE.md` con la versión nueva.
+**No toca** `.docs/`, `notes.md` ni los archivos de trabajo en
+`.docs/changes/`.
+
+> Si has personalizado algún comando o skill, haz commit de tus cambios
+> antes de actualizar, o trabaja en una rama separada para reconciliar.
+
+---
+
+## Desinstalación
+
+```bash
+rm -rf .spec .claude .docs
+rm -f CLAUDE.md notes.md
+```
+
+> Esto borra también toda la memoria arquitectónica (`.docs/`). Si
+> quieres conservarla, muévela antes a otro sitio.
+
+---
+
+## Problemas comunes
+
+### Los comandos no aparecen en Claude Code
+
+1. Verifica los symlinks: `ls -la .claude/`.
+2. Cierra y reabre Claude Code (a veces cachea el listado).
+3. Verifica que los archivos en `.spec/commands/` tienen frontmatter
+   válido (con `description:` al menos).
+
+### "No encuentro la skill `load-context`"
+
+- Verifica que existe `.spec/skills/load-context/SKILL.md`.
+- Verifica que el frontmatter tiene `name:` y `description:`.
+- Asegúrate de que el symlink `.claude/skills` apunta a
+  `../.spec/skills`.
+
+### Symlinks rotos al clonar el repo
+
+Si clonas en otra máquina y los symlinks no funcionan:
+
+```bash
+git config core.symlinks true
+git reset --hard HEAD
+```
+
+En Windows nativo, los symlinks necesitan **Developer Mode** activado o
+permisos de administrador. La alternativa recomendada es **WSL**.
+
+### `install.sh` falla con "permission denied"
+
+Ejecuta con `bash` explícito en vez de hacerlo ejecutable:
+
+```bash
+bash install.sh
+```
+
+---
+
+## Siguiente paso
+
+Lee [README.md](./README.md) para entender el flujo completo de
+libnova.spec.
