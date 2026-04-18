@@ -50,7 +50,7 @@ Si todas están marcadas, avisa: "ejecuta `/sdd-review`".
 
 - Lee archivos relevantes antes de modificar
 - Implementa el cambio
-- Aplica convenciones (skill `openaccess-conventions` si existe)
+- Sigue las convenciones del repo circundante
 - Characterization tests: escribir antes de tocar producción
 
 No modifiques fuera del alcance de la tarea. Si hace falta, pregunta.
