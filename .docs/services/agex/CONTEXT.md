@@ -43,7 +43,9 @@ a través del symlink `.claude/commands → ../.spec/commands`.
 
 - `sdd-start.md` — orquestador de inicio; clasifica el ticket y crea rama
 - `sdd-spec.md` — usa la skill `close-requirement`; genera `proposal.md`
-- `sdd-plan.md` — genera `plan.md` y `tasks.md` a partir de la spec
+- `sdd-plan.md` — cierra 3 decisiones de planificación con el dev
+  (estrategia, granularidad, safety net) vía `collaborative-decision`
+  y genera `plan.md` y `tasks.md`
 - `sdd-do.md` — ejecuta `tasks.md` tarea a tarea con review incremental
 - `sdd-review.md` — revisa en 4 ejes: spec, convenciones, ADRs, riesgos
 - `sdd-wrap.md` — alimenta memoria, archiva spec, crea commit y PR
@@ -51,13 +53,21 @@ a través del symlink `.claude/commands → ../.spec/commands`.
 
 ### Skills (`/.spec/skills/`)
 
-Cuatro skills autocargadas por contexto. Claude Code las descubre
+Cinco skills autocargadas por contexto. Claude Code las descubre
 a través del symlink `.claude/skills → ../.spec/skills`.
 
+Se distinguen dos tipos (ver ADR-0001):
+
+**Verticales** — específicas de una fase del flujo:
 - `load-context` — carga CONTEXT.md, ADRs y specs relevantes al inicio
 - `close-requirement` — cierra decisiones abiertas con preguntas estructuradas
 - `write-adr` — crea Architectural Decision Records en `.docs/adr/`
 - `update-service-context` — actualiza CONTEXT.md de un servicio al cerrar ticket
+
+**Horizontales** — reutilizables por varios comandos:
+- `collaborative-decision` — cierra un punto de decisión con el usuario
+  presentando 2-4 opciones con trade-offs y default anclado; usada hoy
+  en `/sdd-plan`, prevista en `/sdd-do` y `/sdd-review` (AGEX-005)
 
 ### Configuración (`.spec/config.yml`)
 
@@ -148,6 +158,12 @@ Cada ejecución del flujo produce artefactos en `.docs/`:
   para reducir fricción, manteniendo el commit y la actualización de
   memoria en `/sdd-wrap`.
 
+- **Skills verticales vs horizontales** (ADR-0001): las skills se
+  clasifican según si pertenecen a una fase concreta (verticales) o
+  son reutilizables por varios comandos (horizontales). La distinción
+  es documental; Claude Code no trata distinto a unas y otras.
+  `collaborative-decision` es la primera horizontal del framework.
+
 - **Idioma**: todo en español. Coherente con el equipo y el contexto
   de uso actual.
 
@@ -166,4 +182,4 @@ Cada ejecución del flujo produce artefactos en `.docs/`:
 
 ## Última actualización
 
-2026-04-18 — AGEX-003
+2026-04-18 — AGEX-005

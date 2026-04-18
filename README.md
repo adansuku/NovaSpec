@@ -38,7 +38,7 @@ agex fuerza un flujo donde:
 |---|---|---|
 | `/sdd-start <TICKET>` | Baja ticket, clasifica, crea rama, carga contexto | `jira-integration`, `load-context` |
 | `/sdd-spec` | Cierra decisiones y genera la spec | `close-requirement` |
-| `/sdd-plan` | Genera plan y lista de tareas | — |
+| `/sdd-plan` | Genera plan y lista de tareas | `collaborative-decision` |
 | `/sdd-do` | Implementa tareas una a una con review incremental | — |
 | `/sdd-review` | Code review final contra spec, ADRs y convenciones | — |
 | `/sdd-wrap` | Actualiza memoria, archiva spec, commit y PR | `write-adr`, `update-service-context` |

@@ -27,6 +27,12 @@ Al cerrar, se archivan en `.docs/changes/archive/`.
 
 Tickets `quick-fix` saltan `/sdd-spec` y `/sdd-plan`.
 
+`/sdd-plan` invoca la skill `collaborative-decision` para cerrar contigo
+tres decisiones (estrategia, granularidad, safety net) antes de redactar
+el plan. Es la primera skill horizontal del framework: pensada para ser
+reutilizada por cualquier comando que necesite cerrar un punto de
+decisión con el desarrollador en vez de resolverlo en silencio.
+
 ## Configuración
 
 La configuración del flujo vive en `.spec/config.yml`.
