@@ -20,26 +20,38 @@ Guía para instalar el framework agex en cualquier repositorio.
 
 ## Instalación rápida
 
-### 1. Posicionarse en el repo destino
+### 1. Clonar el repo `agex` en local
+
+```bash
+git clone <url-del-repo-agex> /ruta/a/agex
+```
+
+`install.sh` copia el contenido desde su propia ubicación, así que
+necesitas tener el repo accesible en disco. El destino puede estar en
+cualquier parte.
+
+### 2. Posicionarse en el repo destino
 
 ```bash
 cd /ruta/a/tu/repo
 ```
 
-### 2. Copiar `install.sh`
-
-Copia el script `install.sh` desde el repo base de agex a la
-raíz de tu repo destino (o invócalo por ruta absoluta).
-
-### 3. Ejecutar
+### 3. Ejecutar con ruta absoluta al script
 
 ```bash
-bash install.sh
+bash /ruta/a/agex/install.sh
 ```
 
-El script es idempotente: se puede ejecutar varias veces sobre el mismo
-repo sin romper nada existente. No sobrescribe `.docs/`, `notes.md` ni
-los archivos de trabajo en `.docs/changes/`.
+El script detecta su propia ubicación (`SCRIPT_DIR`) y copia desde
+allí `.spec/` y `CLAUDE.md` al directorio actual. El destino es `$PWD`.
+
+Es idempotente: ejecutarlo varias veces regenera `.spec/` y `CLAUDE.md`
+desde la fuente, pero **no toca** `.docs/`, `notes.md` ni los archivos
+de trabajo en `.docs/changes/`.
+
+Si ejecutas el script desde un directorio donde no encuentra sus fuentes
+(`.spec/` y `CLAUDE.md` en su mismo `SCRIPT_DIR`), aborta con un mensaje
+de error y exit distinto de cero.
 
 ---
 
@@ -163,19 +175,22 @@ el formato.
 
 ## Actualización del framework
 
-Para actualizar agex en un repo ya instalado, vuelve a ejecutar
-`install.sh` desde la versión más reciente del repo base:
+Para actualizar agex en un repo ya instalado, actualiza tu clone
+local del repo agex (`git pull`) y vuelve a ejecutar el script desde
+tu repo destino:
 
 ```bash
-bash install.sh
+cd /ruta/a/agex && git pull
+cd /ruta/a/tu/repo && bash /ruta/a/agex/install.sh
 ```
 
-El script sobrescribe `.spec/` y `CLAUDE.md` con la versión nueva.
-**No toca** `.docs/`, `notes.md` ni los archivos de trabajo en
-`.docs/changes/`.
+El script sobrescribe `.spec/` y `CLAUDE.md` con la versión de la
+fuente. **No toca** `.docs/`, `notes.md` ni los archivos de trabajo
+en `.docs/changes/`.
 
-> Si has personalizado algún comando o skill, haz commit de tus cambios
-> antes de actualizar, o trabaja en una rama separada para reconciliar.
+> Si has personalizado algún comando o skill en el repo destino, haz
+> commit de tus cambios antes de actualizar, o trabaja en una rama
+> separada para reconciliar.
 
 ---
 

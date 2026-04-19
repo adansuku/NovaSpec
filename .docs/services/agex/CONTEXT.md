@@ -97,19 +97,27 @@ Directorio vacío reservado para sub-agentes futuros.
 
 ## Instalación
 
-El script `install.sh` (en la raíz del repo agex) crea en el repo destino:
+El script `install.sh` (en la raíz del repo agex) **copia** `.spec/` y
+`CLAUDE.md` desde su propia ubicación (`SCRIPT_DIR`) al repo destino
+(`$PWD`) y **crea** la estructura vacía `.docs/` y los symlinks `.claude/`.
 
-1. La estructura `.spec/` con comandos, skills y config
-2. La estructura `.docs/` con subdirectorios de memoria
-3. El `CLAUDE.md` que ancla el repo para Claude Code
-4. Los symlinks en `.claude/` que apuntan a `.spec/`
+Invocación canónica desde el repo destino:
+
+```bash
+bash /ruta/a/agex/install.sh
+```
+
+El script resuelve `SCRIPT_DIR` vía `cd "$(dirname "${BASH_SOURCE[0]}")" && pwd`
+y aborta (`exit 1`) si no encuentra `.spec/` y `CLAUDE.md` en `SCRIPT_DIR`,
+o si se ejecuta desde dentro del propio repo agex (`PWD == SCRIPT_DIR`, caso
+destructivo porque `rm -rf .spec` borraría la fuente).
 
 Los symlinks son el mecanismo por el que Claude Code descubre los comandos
 y skills: `.claude/commands → ../.spec/commands`, etc.
 
-El script es idempotente: puede ejecutarse varias veces sin romper
-instalaciones existentes. No toca `.docs/`, `notes.md` ni los archivos
-de trabajo en `.docs/changes/`.
+El script es idempotente: puede ejecutarse varias veces. Sobrescribe `.spec/`
+y `CLAUDE.md` con la versión de la fuente. **No toca** `.docs/`, `notes.md`
+ni los archivos de trabajo en `.docs/changes/`.
 
 ## Memoria arquitectónica generada
 
@@ -135,6 +143,12 @@ de `active/` a `archive/`.
   `.spec/` para que Claude Code descubra comandos y skills. Elegido sobre
   copiar archivos para evitar divergencia entre la fuente y lo que ve el
   agente.
+
+- **`install.sh` copia desde la fuente** (ADR-0001, AGEX-009): el instalador
+  hace `cp -R` desde `SCRIPT_DIR` en vez de embeber heredocs. Elegido sobre
+  mantener heredocs tras drift probado (AGEX-004, AGEX-005, AGEX-008) y
+  sobre un generador externo. Coste: requiere tener el repo agex clonado
+  localmente para instalar o actualizar.
 
 - **`.docs/` como contenedor único de memoria**: toda la memoria
   arquitectónica (ADRs, CONTEXT.md, specs, cambios en curso) vive bajo
@@ -175,4 +189,4 @@ de `active/` a `archive/`.
 
 ## Última actualización
 
-2026-04-18 — AGEX-008
+2026-04-19 — AGEX-009
