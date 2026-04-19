@@ -16,3 +16,4 @@ Cambios activos en `.docs/changes/active/<ticket-id>/`, archivados en `.docs/cha
 - Checkpoints humanos después de `/nova-spec` y antes de `/nova-wrap`.
 - Alimenta la memoria al cerrar.
 - No uses comandos fuera de orden.
+- Respuestas directas: sin acuses de recibo ni frases de transición.
