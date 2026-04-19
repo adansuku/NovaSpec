@@ -1,35 +1,14 @@
 # Proyecto con nova-spec
 
 Este repo usa el flujo **nova-spec** (SDD) para cualquier cambio no trivial.
-
-## Memoria arquitectónica
-
-Antes de empezar cualquier ticket, carga el contexto relevante:
-
-1. `.docs/services/<servicio>/CONTEXT.md` — qué hace cada servicio
-2. `.docs/adr/` — decisiones arquitectónicas vigentes
-3. `.docs/glossary.md` — términos del dominio
+Configuración en `novaspec/config.yml`. Contexto arquitectónico en `.docs/`.
 
 ## Flujo de trabajo
 
-```
-/nova-start <TICKET>      Arranca el flujo, clasifica, carga contexto
-/nova-spec                Genera la spec (qué cambia y por qué)
-/nova-plan                Genera plan y tareas
-/nova-build               Implementa tareas
-/nova-review              Valida spec, convenciones y ADRs
-/nova-wrap                Actualiza memoria, commit y PR
-/nova-status [TICKET-ID]  Muestra el estado actual del ticket (solo lectura)
-```
-
-Los cambios en curso viven en `.docs/changes/active/<ticket-id>/`.
-Al cerrar, se archivan en `.docs/changes/archive/`.
-
-Tickets `quick-fix` saltan `/nova-spec` y `/nova-plan`.
-
-## Configuración
-
-La configuración del flujo vive en `novaspec/config.yml`.
+Comandos `/nova-*` en `novaspec/commands/` — teclea `/` para ver el listado.
+Orden: `nova-start` → `nova-spec` → `nova-plan` → `nova-build` → `nova-review` → `nova-wrap`.
+Tickets `quick-fix` saltan `nova-spec` y `nova-plan`.
+Cambios activos en `.docs/changes/active/<ticket-id>/`, archivados en `.docs/changes/archive/`.
 
 ## Reglas
 
