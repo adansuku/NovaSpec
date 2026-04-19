@@ -1,2 +1,3 @@
 .docs/backlog/*
-.claude/worktrees/
+.claude/*
+.opencode/*
