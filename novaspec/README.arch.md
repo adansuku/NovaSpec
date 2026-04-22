@@ -33,7 +33,7 @@ Modelo de memoria: un hecho → un archivo, nombre = índice, supersede explíci
 
 | Tipo | Cuándo | Flujo |
 |------|-------|-------|
-| quick-fix | Bug < 2h | start→build→wrap |
+| quick-fix | Bug < 2h | start→build→review→wrap |
 | feature | Funcionalidad 2h-3d | Completo |
 | architecture | Rewrite > 3d | Completo + decisión documentada en `context/decisions/` |
 

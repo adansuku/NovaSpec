@@ -10,7 +10,7 @@
 `/nova-wrap` → commit, PR, update memory
 `/nova-status` → show ticket status
 
-Quick-fix: `/nova-start` → `/nova-build` → `/nova-wrap`
+Quick-fix: `/nova-start` → `/nova-build` → `/nova-review` → `/nova-wrap`
 
 ## Estructura
 

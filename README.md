@@ -70,9 +70,13 @@ Los `quick-fix` saltan `/nova-spec` y `/nova-plan`.
 - Estructura de `context/`: [context/README.md](./context/README.md)
 - Contribuir: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## Dogfood
+## Dogfood y ejemplos
 
-Este repo se desarrolla con `nova-spec`. Las carpetas `context/decisions/`, `context/gotchas/` y `context/changes/archive/` contienen las decisiones y specs reales del propio framework — úsalas como ejemplo vivo de cómo se ve un proyecto maduro.
+Este repo se desarrolla con `nova-spec`. Las carpetas `context/decisions/`, `context/gotchas/` y `context/changes/archive/` contienen decisiones y specs reales del propio framework — úsalas como ejemplo vivo de cómo se ve el flujo.
+
+Notas:
+- Prefijo legacy: algunos tickets antiguos usan `AGEX-*`. El prefijo actual es `NOVA-*`.
+- Al instalar en otro repo, `install.sh` **no copia** el `context/` de este repo: crea una estructura `context/` vacía en el repo destino.
 
 ## Licencia
 
