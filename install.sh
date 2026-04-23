@@ -400,8 +400,22 @@ elif [[ -f novaspec/config.example.yml ]]; then
 fi
 
 echo -e "${YELLOW}[2/6] Copiando AGENTS.md / CLAUDE.md${NC}"
-cp "$SCRIPT_DIR/AGENTS.md" ./AGENTS.md
-cp "$SCRIPT_DIR/CLAUDE.md" ./CLAUDE.md
+for f in AGENTS.md CLAUDE.md; do
+  src="$SCRIPT_DIR/$f"
+  dst="./$f"
+  if [[ -f "$dst" ]]; then
+    if diff -q "$src" "$dst" >/dev/null 2>&1; then
+      : # idéntico, no-op
+    else
+      ts=$(date +%Y%m%d-%H%M%S)
+      backup="$dst.bak.$ts"
+      cp "$dst" "$backup"
+      echo -e "${YELLOW}  ℹ $f existente y distinto → backup en $backup (no se sobrescribe)${NC}"
+    fi
+  else
+    cp "$src" "$dst"
+  fi
+done
 
 echo -e "${YELLOW}[3/6] Creando estructura context/${NC}"
 mkdir -p context/{decisions/archived,gotchas,services,changes/{active,archive}}
