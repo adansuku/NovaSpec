@@ -20,12 +20,13 @@
 | NOVA-014 | Arquitectura SDD-Orchestrator con subagentes especializados | architecture | alta |
 | NOVA-015 | Auto ADR / análisis de arquitectura en `/init` para repos existentes | feature | media |
 | NOVA-016 | Soporte multi-agente en el flujo nova-spec | architecture | alta |
+| NOVA-017 | `/nova-analyst` opcional para elicitación profunda pre-spec | feature | media |
 
 ## Convención de IDs
 
 - Tickets previos al rebrand: prefijo **AGEX-** (histórico, no se reutilizan).
 - Tickets nuevos: prefijo **NOVA-** — el número coincide con el ticket de Jira.
-- Próximo ID libre: **NOVA-017**.
+- Próximo ID libre: **NOVA-018**.
 
 ## Cómo promover un item a ticket activo
 

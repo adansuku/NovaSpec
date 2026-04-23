@@ -298,6 +298,78 @@ notes.md
 EOF
 }
 
+# Crea symlinks per-ítem en .<runtime>/{commands,skills,agents}/<name>.
+# Convive con commands/skills/agents ajenos del usuario. Aborta ante
+# colisiones de nombre (marca COLLISION=1 en el caller).
+#
+# Migra instalaciones previas que usaban symlinks a la carpeta entera
+# (p. ej. .claude/skills -> ../novaspec/skills) y limpia el symlink
+# anidado .claude/skills/skills que producía la versión anterior cuando
+# .claude/skills/ ya existía como directorio real.
+install_nova_symlinks() {
+  local runtime=$1    # "claude" | "opencode"
+  local base=".$runtime"
+  mkdir -p "$base"
+
+  local kind
+  for kind in commands skills agents; do
+    # Migración: quitar symlink legacy a la carpeta entera de novaspec/.
+    local legacy="$base/$kind"
+    if [[ -L "$legacy" ]]; then
+      local current_legacy
+      current_legacy=$(readlink "$legacy")
+      case "$current_legacy" in
+        ../novaspec/$kind|../novaspec/$kind/)
+          rm -f "$legacy"
+          ;;
+      esac
+    fi
+    # Limpieza del bug anidado del instalador anterior.
+    if [[ -L "$base/$kind/$kind" ]]; then
+      rm -f "$base/$kind/$kind"
+    fi
+  done
+
+  for kind in commands skills agents; do
+    local src="$SCRIPT_DIR/novaspec/$kind"
+    [[ -d "$src" ]] || continue
+    local dst="$base/$kind"
+    mkdir -p "$dst"
+
+    shopt -s nullglob
+    local -a items=()
+    case "$kind" in
+      skills)  items=("$src"/*/) ;;  # skills son directorios con SKILL.md
+      *)       items=("$src"/*.md) ;; # commands y agents son archivos .md
+    esac
+    shopt -u nullglob
+
+    local item name target link current
+    for item in "${items[@]}"; do
+      name=$(basename "$item")
+      target="../../novaspec/$kind/$name"
+      link="$dst/$name"
+
+      if [[ -L "$link" ]]; then
+        current=$(readlink "$link")
+        if [[ "$current" != "$target" ]]; then
+          echo -e "${YELLOW}  ⚠ $link ya es symlink a $current — saltando${NC}"
+        fi
+        continue
+      fi
+
+      if [[ -e "$link" ]]; then
+        echo -e "${RED}  ✗ $link ya existe y no es de nova-spec${NC}" >&2
+        echo -e "${RED}    Renómbralo o muévelo antes de reinstalar.${NC}" >&2
+        COLLISION=1
+        continue
+      fi
+
+      ln -s "$target" "$link"
+    done
+  done
+}
+
 # Validar TARGET
 if [[ "$TARGET" != "claude" ]] && [[ "$TARGET" != "opencode" ]] && [[ "$TARGET" != "both" ]]; then
   echo -e "${RED}✗ Destino inválido: $TARGET${NC}" >&2
@@ -335,26 +407,16 @@ echo -e "${YELLOW}[3/6] Creando estructura context/${NC}"
 mkdir -p context/{decisions/archived,gotchas,services,changes/{active,archive}}
 touch context/changes/active/.gitkeep
 
+COLLISION=0
+
 if [[ "$TARGET" == "claude" ]] || [[ "$TARGET" == "both" ]]; then
-  echo -e "${YELLOW}[4/6] Creando symlinks .claude/${NC}"
-  mkdir -p .claude
-  (
-    cd .claude
-    [[ -L commands ]] || ln -s ../novaspec/commands commands
-    [[ -L skills ]]   || ln -s ../novaspec/skills skills
-    [[ -L agents ]]   || ln -s ../novaspec/agents agents
-  )
+  echo -e "${YELLOW}[4/6] Symlinks .claude/ (por ítem)${NC}"
+  install_nova_symlinks claude
 fi
 
 if [[ "$TARGET" == "opencode" ]] || [[ "$TARGET" == "both" ]]; then
-  echo -e "${YELLOW}[4/6] Creando symlinks .opencode/${NC}"
-  mkdir -p .opencode
-  (
-    cd .opencode
-    [[ -L commands ]] || ln -s ../novaspec/commands commands
-    [[ -L skills ]]   || ln -s ../novaspec/skills skills
-    [[ -L agents ]]   || ln -s ../novaspec/agents agents
-  )
+  echo -e "${YELLOW}[4/6] Symlinks .opencode/ (por ítem)${NC}"
+  install_nova_symlinks opencode
 
   echo -e "${YELLOW}[5/6] Configurando OpenCode${NC}"
   if [[ ! -f .opencode/settings.local.json ]]; then
@@ -369,6 +431,13 @@ if [[ "$TARGET" == "opencode" ]] || [[ "$TARGET" == "both" ]]; then
 }
 EOF
   fi
+fi
+
+if [[ "$COLLISION" == "1" ]]; then
+  echo "" >&2
+  echo -e "${RED}✗ Instalación incompleta por colisiones de nombre.${NC}" >&2
+  echo "  Resuelve los conflictos (rename/move) y vuelve a ejecutar." >&2
+  exit 1
 fi
 
 echo -e "${YELLOW}[5/6] Asegurando .gitignore${NC}"
