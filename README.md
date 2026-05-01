@@ -7,6 +7,9 @@
   De ticket de Jira a PR mergeado en pasos explícitos, con memoria arquitectónica que no decae.
 </p>
 
+> **🔬 Este es el repo lab.** Aquí está el desarrollo original en español, con todo el dogfooding visible (specs, decisions, gotchas).
+> Para la versión limpia y publicada en inglés, ve a **[adansuku/nova-spec](https://github.com/adansuku/nova-spec)**.
+
 ---
 
 ## Qué es
